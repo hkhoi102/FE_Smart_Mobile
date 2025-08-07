@@ -1,110 +1,101 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { Dimensions, FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import SearchBar from '../components/SearchBar';
 
-import { Collapsible } from '../components/Collapsible';
-import { ExternalLink } from '../components/ExternalLink';
-import ParallaxScrollView from '../components/ParallaxScrollView';
-import { ThemedText } from '../components/ThemedText';
-import { ThemedView } from '../components/ThemedView';
-import { IconSymbol } from '../components/ui/IconSymbol';
+// Define color palettes for random assignment
+const colorPalettes = [
+  { bgColor: '#E9F5E1', borderColor: '#B6E2A1' }, // Green
+  { bgColor: '#FFF7E1', borderColor: '#FFE1A1' }, // Yellow
+  { bgColor: '#FFE9E9', borderColor: '#FFB6B6' }, // Pink
+  { bgColor: '#F3E9FF', borderColor: '#D1B6FF' }, // Purple
+  { bgColor: '#FFF9E1', borderColor: '#FFF1A1' }, // Light Yellow
+  { bgColor: '#E9F3FF', borderColor: '#B6D6FF' }, // Blue
+];
+
+// Function to get random color palette
+const getRandomColorPalette = () => {
+  const randomIndex = Math.floor(Math.random() * colorPalettes.length);
+  return colorPalettes[randomIndex];
+};
+
+// Sample data structure for database
+const sampleCategories = [
+  { id: '1', name: 'Fresh Fruits & Vegetable', image: require('../assets/images/product/rau.png') },
+  { id: '2', name: 'Cooking Oil & Ghee', image: require('../assets/images/product/tao.png') },
+  { id: '3', name: 'Meat & Fish', image: require('../assets/images/product/thit.png') },
+  { id: '4', name: 'Bakery & Snacks', image: require('../assets/images/product/rau.png') },
+  { id: '5', name: 'Dairy & Eggs', image: require('../assets/images/product/tao.png') },
+  { id: '6', name: 'Beverages', image: require('../assets/images/product/thit.png') },
+];
+
+// Process categories with random colors
+const processCategories = (categories: any[]) => {
+  return categories.map(category => ({
+    ...category,
+    ...getRandomColorPalette(),
+  }));
+};
+
+const categories = processCategories(sampleCategories);
+
+const { width } = Dimensions.get('window');
+const ITEM_WIDTH = (width - 48) / 2;
 
 export default function ExploreScreen() {
+  const [search, setSearch] = useState('');
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="React Navigation">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">screens/HomeScreen.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">screens/ExploreScreen.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The navigation is set up in <ThemedText type="defaultSemiBold">index.js</ThemedText>{' '}
-          using React Navigation.
-        </ThemedText>
-        <ExternalLink href="https://reactnavigation.org/docs/getting-started">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('../assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">index.js</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Find Products</Text>
+      <SearchBar value={search} onChangeText={setSearch} />
+      <FlatList
+        data={categories}
+        numColumns={2}
+        keyExtractor={item => item.id}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
+        contentContainerStyle={{ paddingBottom: 24, marginTop: 8 }}
+        renderItem={({ item }) => (
+          <View style={[styles.card, { backgroundColor: item.bgColor, borderColor: item.borderColor, width: ITEM_WIDTH }]}>
+            <Image source={item.image} style={styles.cardImage} />
+            <Text style={styles.cardText}>{item.name}</Text>
+          </View>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingTop: 60,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  card: {
+    borderRadius: 18,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    padding: 16,
+    marginBottom: 16,
+  },
+  cardImage: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain',
+    marginBottom: 12,
+  },
+  cardText: {
+    fontSize: 15,
+    color: '#222',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
