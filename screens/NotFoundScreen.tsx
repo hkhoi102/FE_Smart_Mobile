@@ -1,0 +1,39 @@
+import { useNavigation } from '@react-navigation/native';
+import { StyleSheet } from 'react-native';
+
+import { ThemedText } from '../components/ThemedText';
+import { ThemedView } from '../components/ThemedView';
+
+export default function NotFoundScreen() {
+  const navigation = useNavigation();
+
+  return (
+    <ThemedView style={styles.container}>
+      <ThemedText style={styles.title}>This screen doesn't exist.</ThemedText>
+      <ThemedView style={styles.link} onTouchEnd={() => navigation.navigate('Root' as never)}>
+        <ThemedText style={styles.linkText}>Go to home screen!</ThemedText>
+      </ThemedView>
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  link: {
+    marginTop: 15,
+    paddingVertical: 15,
+  },
+  linkText: {
+    fontSize: 14,
+    color: '#2e78b7',
+  },
+});
