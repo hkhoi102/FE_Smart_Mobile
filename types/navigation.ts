@@ -1,5 +1,14 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 
+export type Product = {
+  id: string;
+  image: any;
+  name: string;
+  desc: string;
+  price: string;
+  onAdd?: () => void;
+};
+
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
@@ -10,11 +19,18 @@ export type RootStackParamList = {
   SignUp: undefined;
   Root: NavigatorScreenParams<TabParamList>;
   NotFound: undefined;
+  ProductDetail: { id: string; data: Product[] };
+  CategoryDetail: { categoryName: string };
+  Filter: undefined;
+  OrderSuccess: undefined;
 };
 
 export type TabParamList = {
-  Home: undefined;
+  Shop: undefined;
   Explore: undefined;
+  Cart: undefined;
+  Favourite: undefined;
+  Account: undefined;
 };
 
 // Navigation prop types
