@@ -534,13 +534,13 @@ export default function HomeScreen() {
           onAddToCart={handleAddToCart}
         />
       )}
-      <ExclusiveOfferSection
+      {/* <ExclusiveOfferSection
         title="Bán Chạy Nhất"
         data={bestSelling}
         onSeeAll={() => { setSeeAllTitle('Bán Chạy Nhất'); setSeeAllItems(bestSelling); setSeeAllVisible(true); }}
         onProductPress={handleProductPress}
         onAddToCart={handleAddToCart}
-      />
+      /> */}
       {search.trim().length === 0 && Array.isArray(categories) && categories.length > 0 && categories.map((category: any) => {
         try {
           if (!category || !category.id) return null;

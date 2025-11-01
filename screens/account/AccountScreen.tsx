@@ -20,11 +20,6 @@ const menuItems = [
     icon: 'person-outline',
   },
   {
-    id: '3',
-    title: 'Địa Chỉ Giao Hàng',
-    icon: 'location-outline',
-  },
-  {
     id: '4',
     title: 'Thông Báo',
     icon: 'notifications-outline',

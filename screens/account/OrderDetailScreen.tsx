@@ -202,15 +202,9 @@ const OrderDetailScreen: React.FC = () => {
       });
 
       if (response.success) {
-        showAlert('Thành công', 'Yêu cầu trả hàng đã được gửi thành công', [
-          {
-            text: 'OK',
-            onPress: () => {
-              setShowReturnModal(false);
-              fetchOrderDetail(); // Refresh order detail
-            },
-          },
-        ]);
+        setShowReturnModal(false);
+        showSuccess('Yêu cầu trả hàng đã được gửi thành công');
+        fetchOrderDetail(); // Refresh order detail
       } else {
         throw new Error(response.message || 'Không thể tạo yêu cầu trả hàng');
       }
@@ -228,40 +222,18 @@ const OrderDetailScreen: React.FC = () => {
   };
 
   const handleSubmitCancel = async () => {
-    showAlert(
-      'Xác nhận hủy đơn',
-      'Bạn có chắc chắn muốn hủy đơn hàng này?',
-      [
-        {
-          text: 'Không',
-          style: 'cancel',
-        },
-        {
-          text: 'Có',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setCancellingOrder(true);
-              await OrderApi.updateOrderStatus(orderId, 'CANCELLED', cancelNote.trim() || undefined);
-              showAlert('Thành công', 'Đơn hàng đã được hủy', [
-                {
-                  text: 'OK',
-                  onPress: () => {
-                    setShowCancelModal(false);
-                    fetchOrderDetail(); // Refresh order detail
-                  },
-                },
-              ]);
-            } catch (e: any) {
-              console.error('Error cancelling order:', e);
-              showError(e.message || 'Không thể hủy đơn hàng. Vui lòng thử lại sau.');
-            } finally {
-              setCancellingOrder(false);
-            }
-          },
-        },
-      ]
-    );
+    try {
+      setCancellingOrder(true);
+      await OrderApi.updateOrderStatus(orderId, 'CANCELLED', cancelNote.trim() || undefined);
+      setShowCancelModal(false);
+      showSuccess('Đơn hàng đã được hủy');
+      fetchOrderDetail(); // Refresh order detail
+    } catch (e: any) {
+      console.error('Error cancelling order:', e);
+      showError(e.message || 'Không thể hủy đơn hàng. Vui lòng thử lại sau.');
+    } finally {
+      setCancellingOrder(false);
+    }
   };
 
   const getOrderStatus = () => {

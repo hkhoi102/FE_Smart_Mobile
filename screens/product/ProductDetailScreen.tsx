@@ -250,9 +250,36 @@ const ProductDetailScreen: React.FC = () => {
               <Ionicons name="add" size={20} color="#222" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.price}>
-            {loading ? 'Đang tải...' : (product?.displayPrice || (product?.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ'))}
-          </Text>
+          <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end' }}>
+            <Text style={styles.price}>
+              {(() => {
+                if (loading) return 'Đang tải...';
+                if (!product) return 'Liên hệ';
+                // Find the selected unit or default unit
+                const selectedUnit = unitId !== undefined
+                  ? product.units?.find(u => u.id === unitId)
+                  : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined);
+
+                if (selectedUnit && selectedUnit.currentPrice !== null && selectedUnit.currentPrice !== undefined) {
+                  return `${selectedUnit.currentPrice.toLocaleString()}đ`;
+                }
+                // Fallback to product price
+                return product.displayPrice || (product.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ');
+              })()}
+            </Text>
+            {(() => {
+              if (loading || !product) return null;
+              // Find the selected unit or default unit
+              const selectedUnit = unitId !== undefined
+                ? product.units?.find(u => u.id === unitId)
+                : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined);
+
+              if (selectedUnit && selectedUnit.unitName) {
+                return <Text style={styles.unitLabel}>{selectedUnit.unitName}</Text>;
+              }
+              return null;
+            })()}
+          </View>
         </View>
         {/* Available Units */}
         {(() => {
@@ -303,16 +330,20 @@ const ProductDetailScreen: React.FC = () => {
       <View style={styles.fixedAddBtn}>
         <PrimaryButton title="Thêm Vào Giỏ" onPress={() => {
           if (!product) return;
-          const unitId = product?.units?.find(u => u.isDefault)?.id
-            || product?.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined)?.id
-            || product.id;
-          const priceNum = typeof product.currentPrice === 'number' ? product.currentPrice : 0;
+          // Use unitId from params if available, otherwise find default unit
+          const selectedUnit = unitId !== undefined
+            ? product.units?.find(u => u.id === unitId)
+            : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined);
+
+          const finalUnitId = selectedUnit?.id || product.id;
+          const priceNum = selectedUnit?.currentPrice ?? product.currentPrice ?? 0;
+
           CartStore.addItem({
-            id: String(unitId),
+            id: String(finalUnitId),
             name: product.name,
-            price: priceNum,
+            price: typeof priceNum === 'number' ? priceNum : 0,
             image: product.displayImage,
-            productUnitId: Number(unitId) || undefined,
+            productUnitId: selectedUnit?.id ? Number(selectedUnit.id) : undefined,
             productId: Number(product.id) || undefined,
             categoryId: (product as any).categoryId,
           });
@@ -413,7 +444,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#222',
-    marginLeft: 'auto',
+  },
+  unitLabel: {
+    fontSize: 14,
+    color: '#888',
+    marginTop: 2,
   },
   unitItem: {
     flexDirection: 'row',
