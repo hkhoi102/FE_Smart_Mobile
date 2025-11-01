@@ -155,10 +155,14 @@ const CategoryDetailScreen: React.FC = () => {
   };
 
   const handleProductPress = (product: ProductWithPrice) => {
-    // Extract original product ID from the combined ID (e.g., "1_1" -> "1")
-    const originalId = product.id.toString().split('_')[0];
-    console.log('🔍 Navigating to ProductDetail with ID:', originalId, 'from product:', product);
-    navigation.navigate('ProductDetail', { id: originalId });
+    const composed = product.id.toString();
+    if (composed.includes('_')) {
+      // Extract productId and unitId from composed ID (format: productId_unitId)
+      const [productId, unitId] = composed.split('_');
+      navigation.navigate('ProductDetail', { id: productId, unitId: Number(unitId) });
+    } else {
+      navigation.navigate('ProductDetail', { id: composed });
+    }
   };
 
   const handleFilterPress = () => {
