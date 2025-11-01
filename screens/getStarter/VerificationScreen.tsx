@@ -1,14 +1,14 @@
 import React, { useRef, useState } from 'react';
 import {
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -71,11 +71,11 @@ export default function VerificationScreen({ navigation }: any) {
 
         {/* Main Content */}
         <View style={styles.content}>
-          <Text style={styles.title}>Enter your 4-digit code</Text>
+          <Text style={styles.title}>Nhập mã 4 chữ số</Text>
 
           {/* Code Input */}
           <View style={styles.codeContainer}>
-            <Text style={styles.codeLabel}>Code</Text>
+            <Text style={styles.codeLabel}>Mã xác thực</Text>
             <View style={styles.inputContainer}>
               {[0, 1, 2, 3].map((index) => (
                 <TextInput
@@ -100,7 +100,7 @@ export default function VerificationScreen({ navigation }: any) {
         {/* Footer - This will automatically move up when keyboard appears */}
         <View style={styles.footer}>
           <TouchableOpacity onPress={handleResendCode}>
-            <Text style={styles.resendText}>Resend Code</Text>
+            <Text style={styles.resendText}>Gửi lại mã</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

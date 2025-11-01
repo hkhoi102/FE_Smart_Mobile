@@ -1,13 +1,13 @@
 import React from 'react';
 import {
-  Dimensions,
-  Image,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  View,
+    Dimensions,
+    Image,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    View,
 } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
+import PrimaryButton from '../../components/PrimaryButton';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,7 +18,7 @@ export default function OnboardingScreen({ navigation }: any) {
 
   return (
     <ImageBackground
-      source={require('../assets/images/get_start.jpg')}
+      source={require('../../assets/images/get_start.jpg')}
       style={styles.container}
       resizeMode="cover"
     >
@@ -26,21 +26,21 @@ export default function OnboardingScreen({ navigation }: any) {
         <View style={styles.content}>
           <View style={styles.logoContainer}>
             <Image
-              source={require('../assets/images/Group.png')}
+              source={require('../../assets/images/Group.png')}
               style={styles.carrotIcon}
               resizeMode="contain"
             />
             <Text style={styles.title}>
-              Welcome{'\n'}to our store
+              Chào mừng{'\n'}đến cửa hàng
             </Text>
             <Text style={styles.description}>
-              Get your groceries in as fast as one hour
+              Nhận hàng tạp hóa nhanh chóng trong vòng một giờ
             </Text>
           </View>
         </View>
 
         <View style={styles.footer}>
-          <PrimaryButton title="Get Started" onPress={handleGetStarted} />
+          <PrimaryButton title="Bắt Đầu" onPress={handleGetStarted} />
         </View>
       </View>
     </ImageBackground>

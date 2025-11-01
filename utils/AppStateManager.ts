@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Buffer } from 'buffer';
 
 export interface AppState {
   isFirstLaunch: boolean;
@@ -50,6 +51,37 @@ class AppStateManager {
       const userData = await AsyncStorage.getItem('userData');
 
       if (userToken && userData) {
+        // Validate JWT expiration (exp, seconds since epoch)
+        try {
+          const parts = userToken.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(
+              Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
+            );
+            const exp: number | undefined = payload?.exp;
+            if (typeof exp === 'number') {
+              const nowInSeconds = Math.floor(Date.now() / 1000);
+              if (exp <= nowInSeconds) {
+                // Token expired: clear stored login data
+                await AsyncStorage.removeItem('userToken');
+                await AsyncStorage.removeItem('userData');
+                this.appState.isLoggedIn = false;
+                this.appState.userToken = undefined;
+                this.appState.userData = undefined;
+                return false;
+              }
+            }
+          }
+        } catch (e) {
+          // If parsing fails, treat as not logged in
+          await AsyncStorage.removeItem('userToken');
+          await AsyncStorage.removeItem('userData');
+          this.appState.isLoggedIn = false;
+          this.appState.userToken = undefined;
+          this.appState.userData = undefined;
+          return false;
+        }
+
         this.appState.isLoggedIn = true;
         this.appState.userToken = userToken;
         this.appState.userData = JSON.parse(userData);

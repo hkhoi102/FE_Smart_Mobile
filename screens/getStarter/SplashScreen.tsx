@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Dimensions, Image, StyleSheet, Text, View } from 'react-native';
-import AppStateManager from '../utils/AppStateManager';
+import AppStateManager from '../../utils/AppStateManager';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,16 +31,16 @@ export default function SplashScreen({ navigation }: any) {
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/images/Group.png')}
+          source={require('../../assets/images/Group.png')}
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.appName}>Supermarket App</Text>
-        <Text style={styles.tagline}>Your grocery shopping companion</Text>
+        <Text style={styles.appName}>Tạp Hóa Nhanh</Text>
+        <Text style={styles.tagline}>Người bạn đồng hành mua sắm tạp hóa của bạn</Text>
       </View>
 
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <Text style={styles.loadingText}>Đang tải...</Text>
       </View>
     </View>
   );

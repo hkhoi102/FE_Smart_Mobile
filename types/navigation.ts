@@ -17,14 +17,24 @@ export type RootStackParamList = {
   Location: undefined;
   Login: undefined;
   SignUp: undefined;
+  OtpVerification: { email: string; fullName: string };
   Root: NavigatorScreenParams<TabParamList>;
   NotFound: undefined;
-  ProductDetail: { id: string; data: Product[] };
+  ProductDetail: { id: string; unitId?: number };
+  CategoryDetail: { categoryName: string; categoryId: number };
+  Filter: undefined;
+  OrderSuccess: undefined;
+  Scanner: undefined;
+  SeeAll: { title?: string; items: { id: string; image: any; name: string; desc: string; price: string }[] };
+  Profile: undefined;
+  Orders: undefined;
+  OrderDetail: { orderId: number };
 };
 
 export type TabParamList = {
   Shop: undefined;
   Explore: undefined;
+  Scanner: undefined;
   Cart: undefined;
   Favourite: undefined;
   Account: undefined;

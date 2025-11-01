@@ -1,27 +1,31 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
+import PrimaryButton from '../../components/PrimaryButton';
+import { authApi } from '../../services/api';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SignUpScreen({ navigation }: any) {
-  const [username, setUsername] = useState('Afsar Hossen Shuvo');
-  const [email, setEmail] = useState('imshuvo97@gmail.com');
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const shakeAnimation = useRef(new Animated.Value(0)).current;
 
@@ -61,10 +65,69 @@ export default function SignUpScreen({ navigation }: any) {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSignUp = () => {
-    console.log('Sign Up:', { username, email, password });
-    // Handle sign up logic here
-    navigation.navigate('Root');
+  const handleSignUp = async () => {
+    if (isLoading) return;
+
+    // Validate input
+    if (!username.trim()) {
+      setError('Vui lòng nhập họ tên');
+      return;
+    }
+    if (!email.trim()) {
+      setError('Vui lòng nhập email');
+      return;
+    }
+    if (!password.trim()) {
+      setError('Vui lòng nhập mật khẩu');
+      return;
+    }
+    if (!phoneNumber.trim()) {
+      setError('Vui lòng nhập số điện thoại');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      console.log('Sign Up:', { fullName: username, email, password, phoneNumber });
+
+      // Call API through gateway
+      const response = await authApi.register({
+        fullName: username,
+        email,
+        password,
+        phoneNumber
+      });
+
+      if (response.success && response.data) {
+        // Navigate to OTP verification screen
+        navigation.navigate('OtpVerification', {
+          email: email,
+          fullName: username
+        });
+      } else {
+        throw new Error(response.message || 'Đăng ký thất bại');
+      }
+    } catch (error: any) {
+      let errorMessage = 'Đăng ký thất bại';
+
+      // The AuthApi already handles error messages, so just use them
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Additional network error handling
+      if (error.message?.includes('timeout')) {
+        errorMessage = 'Kết nối timeout, vui lòng kiểm tra mạng';
+      } else if (error.message?.includes('Network request failed')) {
+        errorMessage = 'Không thể kết nối đến server';
+      }
+
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogin = () => {
@@ -105,7 +168,7 @@ export default function SignUpScreen({ navigation }: any) {
           {/* Logo */}
           <View style={styles.logoContainer}>
             <Animated.Image
-              source={require('../assets/images/carot.png')}
+              source={require('../../assets/images/carot.png')}
               style={[
                 styles.carrotLogo,
                 {
@@ -118,19 +181,23 @@ export default function SignUpScreen({ navigation }: any) {
 
           {/* Title */}
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Sign Up</Text>
-            <Text style={styles.subtitle}>Enter your credentials to continue</Text>
+            <Text style={styles.title}>Đăng Ký</Text>
+            <Text style={styles.subtitle}>Nhập thông tin để tiếp tục</Text>
           </View>
 
           {/* Form */}
           <View style={styles.formContainer}>
             {/* Username Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Username</Text>
+              <Text style={styles.inputLabel}>Tên người dùng</Text>
               <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
+                autoCapitalize="words"
+                autoCorrect={false}
+                autoComplete="off"
+                placeholder="Nhập tên người dùng"
                 placeholderTextColor="#7C7C7C"
               />
               <View style={styles.inputUnderline} />
@@ -146,6 +213,9 @@ export default function SignUpScreen({ navigation }: any) {
                   onChangeText={setEmail}
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="off"
+                  placeholder="Nhập email của bạn"
                   placeholderTextColor="#7C7C7C"
                 />
                 <View style={styles.checkIcon}>
@@ -161,14 +231,14 @@ export default function SignUpScreen({ navigation }: any) {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>Mật khẩu</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   placeholderTextColor="#7C7C7C"
                 />
                 <TouchableOpacity
@@ -184,18 +254,40 @@ export default function SignUpScreen({ navigation }: any) {
               </View>
               <View style={styles.inputUnderline} />
             </View>
+
+            {/* Phone Number Input */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Số điện thoại</Text>
+              <TextInput
+                style={styles.input}
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                keyboardType="phone-pad"
+                placeholder="Nhập số điện thoại của bạn"
+                placeholderTextColor="#7C7C7C"
+              />
+              <View style={styles.inputUnderline} />
+            </View>
           </View>
+
+          {/* Error Message */}
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={20} color="#E53E3E" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
           {/* Terms and Privacy */}
           <View style={styles.termsContainer}>
             <Text style={styles.termsText}>
-              By continuing you agree to our{' '}
+              Bằng cách tiếp tục, bạn đồng ý với{' '}
               <Text style={styles.termsLink} onPress={handleTermsOfService}>
-                Terms of Service
+                Điều Khoản Dịch Vụ
               </Text>
-              {' '}and{' '}
+              {' '}và{' '}
               <Text style={styles.termsLink} onPress={handlePrivacyPolicy}>
-                Privacy Policy
+                Chính Sách Bảo Mật
               </Text>
             </Text>
           </View>
@@ -203,17 +295,18 @@ export default function SignUpScreen({ navigation }: any) {
           {/* Sign Up Button */}
           <View style={styles.buttonContainer}>
             <PrimaryButton
-              title="Sing Up"
+              title={isLoading ? "Đang đăng ký..." : "Đăng Ký"}
               onPress={handleSignUp}
+              disabled={isLoading}
             />
           </View>
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>
-              Already have an account?{' '}
+              Đã có tài khoản?{' '}
               <Text style={styles.loginLink} onPress={handleLogin}>
-                Login
+                Đăng Nhập
               </Text>
             </Text>
           </View>
@@ -314,6 +407,23 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: '#E0E0E0',
     marginTop: 5,
+  },
+  // Error styles
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F5',
+    borderColor: '#FED7D7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#E53E3E',
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
   },
   // Terms styles
   termsContainer: {

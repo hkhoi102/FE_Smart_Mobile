@@ -8,7 +8,7 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export default function SearchBar({ value, onChangeText, placeholder = 'Search Store' }: SearchBarProps) {
+export default function SearchBar({ value, onChangeText, placeholder = 'Tìm kiếm cửa hàng' }: SearchBarProps) {
   return (
     <View style={styles.container}>
       <MaterialIcons name="search" size={20} color="#222" />

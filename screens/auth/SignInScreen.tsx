@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
+import PrimaryButton from '../../components/PrimaryButton';
 
 const { width, height } = Dimensions.get('window');
 const HEADER_HEIGHT = height * 0.4;
@@ -75,7 +75,7 @@ export default function SignInScreen({ navigation }: any) {
         ]}
       >
         <Animated.Image
-          source={require('../assets/images/mark.png')}
+          source={require('../../assets/images/mark.png')}
           style={[
             styles.headerImage,
             {
@@ -100,17 +100,17 @@ export default function SignInScreen({ navigation }: any) {
       >
         <View style={styles.spacer} />
         <View style={styles.loginSection}>
-          <Text style={styles.title}>Get your groceries with nectar</Text>
+          <Text style={styles.title}>Mua sắm tạp hóa với chúng tôi</Text>
 
           {/* Phone Number Input */}
           <View style={styles.phoneInputContainer}>
             <View style={styles.countryCode}>
-              <Text style={styles.flag}>🇧🇩</Text>
-              <Text style={styles.countryCodeText}>+880</Text>
+              <Text style={styles.flag}>🇻🇳</Text>
+              <Text style={styles.countryCodeText}>+84</Text>
             </View>
             <TextInput
               style={styles.phoneInput}
-              placeholder="Enter your phone number"
+              placeholder="Nhập số điện thoại của bạn"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
@@ -118,7 +118,7 @@ export default function SignInScreen({ navigation }: any) {
           </View>
 
           <PrimaryButton
-            title="Continue with Phone"
+            title="Tiếp tục với số điện thoại"
             onPress={handleContinueWithPhone}
             style={styles.phoneButton}
           />
@@ -126,19 +126,19 @@ export default function SignInScreen({ navigation }: any) {
           {/* Separator */}
           <View style={styles.separator}>
             <View style={styles.separatorLine} />
-            <Text style={styles.separatorText}>Or connect with social media</Text>
+            <Text style={styles.separatorText}>Hoặc kết nối với mạng xã hội</Text>
             <View style={styles.separatorLine} />
           </View>
 
           {/* Social Media Buttons */}
           <TouchableOpacity style={styles.googleButton} onPress={handleContinueWithGoogle}>
             <Text style={styles.googleIcon}>G</Text>
-            <Text style={styles.googleText}>Continue with Google</Text>
+            <Text style={styles.googleText}>Tiếp tục với Google</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.facebookButton} onPress={handleContinueWithFacebook}>
             <Text style={styles.facebookIcon}>f</Text>
-            <Text style={styles.facebookText}>Continue with Facebook</Text>
+            <Text style={styles.facebookText}>Tiếp tục với Facebook</Text>
           </TouchableOpacity>
         </View>
       </Animated.ScrollView>

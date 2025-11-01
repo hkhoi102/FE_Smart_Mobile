@@ -11,37 +11,37 @@ import {
   TouchableWithoutFeedback,
   View
 } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
+import PrimaryButton from '../../components/PrimaryButton';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LocationScreen({ navigation }: any) {
-  const [zone, setZone] = useState('Banasree');
+  const [zone, setZone] = useState('Cầu Giấy');
   const [area, setArea] = useState('');
   const [showZoneModal, setShowZoneModal] = useState(false);
   const [showAreaModal, setShowAreaModal] = useState(false);
 
   // Sample data for zones and areas
   const zones = [
-    'Banasree',
-    'Dhanmondi',
-    'Gulshan',
-    'Mirpur',
-    'Uttara',
-    'Mohammadpur',
-    'Lalbagh',
-    'Old Dhaka'
+    'Cầu Giấy',
+    'Đống Đa',
+    'Hai Bà Trưng',
+    'Hoàn Kiếm',
+    'Tây Hồ',
+    'Thanh Xuân',
+    'Long Biên',
+    'Cầu Giấy'
   ];
 
   const areas: { [key: string]: string[] } = {
-    'Banasree': ['Banasree Block A', 'Banasree Block B', 'Banasree Block C', 'Banasree Block D'],
-    'Dhanmondi': ['Dhanmondi 1', 'Dhanmondi 2', 'Dhanmondi 3', 'Dhanmondi 4', 'Dhanmondi 5'],
-    'Gulshan': ['Gulshan 1', 'Gulshan 2', 'Gulshan 3'],
-    'Mirpur': ['Mirpur 1', 'Mirpur 2', 'Mirpur 3', 'Mirpur 4', 'Mirpur 5', 'Mirpur 6'],
-    'Uttara': ['Uttara 1', 'Uttara 2', 'Uttara 3', 'Uttara 4', 'Uttara 5', 'Uttara 6'],
-    'Mohammadpur': ['Mohammadpur 1', 'Mohammadpur 2', 'Mohammadpur 3'],
-    'Lalbagh': ['Lalbagh 1', 'Lalbagh 2', 'Lalbagh 3'],
-    'Old Dhaka': ['Old Dhaka 1', 'Old Dhaka 2', 'Old Dhaka 3']
+    'Cầu Giấy': ['Phường Dịch Vọng', 'Phường Dịch Vọng Hậu', 'Phường Mai Dịch', 'Phường Nghĩa Tân'],
+    'Đống Đa': ['Phường Khâm Thiên', 'Phường Hàng Bột', 'Phường Láng Thượng', 'Phường Ô Chợ Dừa'],
+    'Hai Bà Trưng': ['Phường Bạch Đằng', 'Phường Bạch Mai', 'Phường Cầu Dền', 'Phường Đống Mác'],
+    'Hoàn Kiếm': ['Phường Chương Dương', 'Phường Cửa Đông', 'Phường Cửa Nam', 'Phường Hàng Bạc'],
+    'Tây Hồ': ['Phường Bưởi', 'Phường Nhật Tân', 'Phường Quảng An', 'Phường Tứ Liên'],
+    'Thanh Xuân': ['Phường Khương Đình', 'Phường Khương Mai', 'Phường Khương Trung', 'Phường Kim Giang'],
+    'Long Biên': ['Phường Bồ Đề', 'Phường Cự Khối', 'Phường Đức Giang', 'Phường Gia Thụy'],
+    'Gò Vấp': ['Phường Dịch Vọng', 'Phường Dịch Vọng Hậu', 'Phường Mai Dịch', 'Phường Nghĩa Tân']
   };
 
   const handleZoneSelect = (selectedZone: string) => {
@@ -102,23 +102,23 @@ export default function LocationScreen({ navigation }: any) {
         {/* Illustration */}
         <View style={styles.illustrationContainer}>
           <Image
-            source={require('../assets/images/illustration.png')}
+            source={require('../../assets/images/illustration.png')}
             style={styles.illustration}
             resizeMode="contain"
           />
         </View>
 
         {/* Title and Description */}
-        <Text style={styles.title}>Select Your Location</Text>
+        <Text style={styles.title}>Chọn Vị Trí Của Bạn</Text>
         <Text style={styles.description}>
-          Swithch on your location to stay in tune with what's happening in your area
+          Bật vị trí của bạn để luôn cập nhật những gì đang xảy ra trong khu vực
         </Text>
 
         {/* Input Fields */}
         <View style={styles.inputSection}>
           {/* Zone Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Your Zone</Text>
+            <Text style={styles.inputLabel}>Quận/Huyện</Text>
             <TouchableOpacity
               style={styles.inputField}
               onPress={() => setShowZoneModal(true)}
@@ -130,13 +130,13 @@ export default function LocationScreen({ navigation }: any) {
 
           {/* Area Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Your Area</Text>
+            <Text style={styles.inputLabel}>Phường/Xã</Text>
             <TouchableOpacity
               style={styles.inputField}
               onPress={() => setShowAreaModal(true)}
             >
               <Text style={[styles.inputText, !area && styles.placeholderText]}>
-                {area || 'Types of your area'}
+                {area || 'Chọn phường/xã của bạn'}
               </Text>
               <Text style={styles.chevron}>▼</Text>
             </TouchableOpacity>
@@ -147,7 +147,7 @@ export default function LocationScreen({ navigation }: any) {
       {/* Submit Button */}
       <View style={styles.footer}>
         <PrimaryButton
-          title="Submit"
+          title="Xác Nhận"
           onPress={handleSubmit}
         />
       </View>
@@ -164,7 +164,7 @@ export default function LocationScreen({ navigation }: any) {
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Zone</Text>
+                  <Text style={styles.modalTitle}>Chọn Quận/Huyện</Text>
                   <TouchableOpacity onPress={() => setShowZoneModal(false)}>
                     <Text style={styles.closeButton}>✕</Text>
                   </TouchableOpacity>
@@ -193,7 +193,7 @@ export default function LocationScreen({ navigation }: any) {
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Area</Text>
+                  <Text style={styles.modalTitle}>Chọn Phường/Xã</Text>
                   <TouchableOpacity onPress={() => setShowAreaModal(false)}>
                     <Text style={styles.closeButton}>✕</Text>
                   </TouchableOpacity>

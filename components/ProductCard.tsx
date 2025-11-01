@@ -16,7 +16,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ image, name, desc, price, onA
     <Image source={image} style={styles.image} />
     <Text style={styles.name}>{name}</Text>
     <Text style={styles.desc}>{desc}</Text>
-    <View style={styles.row}>
+    <View style={styles.productFooter}>
       <Text style={styles.price}>{price}</Text>
       <AddButton onPress={onAdd} />
     </View>
@@ -25,16 +25,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ image, name, desc, price, onA
 
 const styles = StyleSheet.create({
   card: {
-
     backgroundColor: '#fff',
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingTop: 8,
     paddingBottom: 6,
-    width: 180,
+    width: 160,
     borderWidth: 1,
     borderColor: '#E5E5E5',
-    margin: 8,
+    marginRight: 12,
+    marginVertical: 8,
     shadowColor: 'transparent',
     elevation: 0,
     justifyContent: 'flex-start',
@@ -61,15 +61,14 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     marginTop: 0,
   },
-  row: {
+  productFooter: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 4,
   },
   price: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 18,
     color: '#222',
   },
 });

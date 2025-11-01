@@ -1,8 +1,10 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { NotificationProvider } from '../contexts/NotificationContext';
+import AppStateManager from '../utils/AppStateManager';
 
 import { HapticTab } from '../components/HapticTab';
 import { IconSymbol } from '../components/ui/IconSymbol';
@@ -14,17 +16,29 @@ import { useColorScheme } from '../hooks/useColorScheme';
 import { RootStackParamList, TabParamList } from '../types/navigation';
 
 // Import screens
-import ExploreScreen from '../screens/ExploreScreen';
-import HomeScreen from '../screens/HomeScreen';
-import LocationScreen from '../screens/LocationScreen';
-import LoginScreen from '../screens/LoginScreen';
-import NotFoundScreen from '../screens/NotFoundScreen';
-import OnboardingScreen from '../screens/OnboardingScreen';
-import ProductDetailScreen from '../screens/ProductDetailScreen';
-import SignInScreen from '../screens/SignInScreen';
-import SignUpScreen from '../screens/SignUpScreen';
-import SplashScreen from '../screens/SplashScreen';
-import VerificationScreen from '../screens/VerificationScreen';
+import AccountScreen from '../screens/account/AccountScreen';
+import OrderDetailScreen from '../screens/account/OrderDetailScreen';
+import OrdersScreen from '../screens/account/OrdersScreen';
+import ProfileScreen from '../screens/account/ProfileScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import OtpVerificationScreen from '../screens/auth/OtpVerificationScreen';
+import SignInScreen from '../screens/auth/SignInScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
+import CartScreen from '../screens/cart/CartScreen';
+import FavouriteScreen from '../screens/favourite/FavouriteScreen';
+import LocationScreen from '../screens/getStarter/LocationScreen';
+import OnboardingScreen from '../screens/getStarter/OnboardingScreen';
+import SplashScreen from '../screens/getStarter/SplashScreen';
+import VerificationScreen from '../screens/getStarter/VerificationScreen';
+import ExploreScreen from '../screens/main/ExploreScreen';
+import HomeScreen from '../screens/main/HomeScreen';
+import NotFoundScreen from '../screens/notification/NotFoundScreen';
+import OrderSuccessScreen from '../screens/notification/OrderSuccessScreen';
+import CategoryDetailScreen from '../screens/product/CategoryDetailScreen';
+import FilterScreen from '../screens/product/filter/FilterScreen';
+import ProductDetailScreen from '../screens/product/ProductDetailScreen';
+import SeeAllScreen from '../screens/product/SeeAllScreen';
+import ScannerScreen from '../screens/scanner/ScannerScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -51,7 +65,7 @@ function TabNavigator() {
         name="Shop"
         component={HomeScreen}
         options={{
-          title: 'Shop',
+          title: 'Cửa Hàng',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="storefront" color={color} />
           ),
@@ -61,17 +75,29 @@ function TabNavigator() {
         name="Explore"
         component={ExploreScreen}
         options={{
-          title: 'Explore',
+          title: 'Danh mục',
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="bag.fill" color={color} />
           ),
         }}
       />
+      {false && (
+        <Tab.Screen
+          name="Scanner"
+          component={ScannerScreen}
+          options={{
+            title: 'Quét Mã',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="qrcode" color={color} />
+            ),
+          }}
+        />
+      )}
       <Tab.Screen
         name="Cart"
-        component={ExploreScreen} // TODO: Replace with CartScreen
+        component={CartScreen}
         options={{
-          title: 'Cart',
+          title: 'Giỏ Hàng',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="cart" color={color} />
           ),
@@ -79,9 +105,9 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="Favourite"
-        component={ExploreScreen} // TODO: Replace with FavouriteScreen
+        component={FavouriteScreen}
         options={{
-          title: 'Favourite',
+          title: 'Yêu Thích',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="heart" color={color} />
           ),
@@ -89,9 +115,9 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="Account"
-        component={ExploreScreen} // TODO: Replace with AccountScreen
+        component={AccountScreen}
         options={{
-          title: 'Account',
+          title: 'Tài Khoản',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person" color={color} />
           ),
@@ -102,9 +128,36 @@ function TabNavigator() {
 }
 
 export default function AppNavigator() {
+  const [initialRoute, setInitialRoute] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const resolveInitial = async () => {
+      const screen = await AppStateManager.getInstance().getInitialScreen();
+      if (isMounted) setInitialRoute(screen);
+    };
+    resolveInitial();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (!initialRoute) {
+    return (
+      <NotificationProvider>
+        <NavigationContainer>
+          <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+            <Stack.Screen name="Splash" component={SplashScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </NotificationProvider>
+    );
+  }
+
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
+    <NotificationProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute as any}>
         <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="SignIn" component={SignInScreen} />
@@ -112,10 +165,20 @@ export default function AppNavigator() {
         <Stack.Screen name="Location" component={LocationScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="OtpVerification" component={OtpVerificationScreen} />
         <Stack.Screen name="Root" component={TabNavigator} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
         <Stack.Screen  name="ProductDetail" component={ProductDetailScreen} />
+        <Stack.Screen name="CategoryDetail" component={CategoryDetailScreen} />
+        <Stack.Screen name="Filter" component={FilterScreen} />
+        <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
+        <Stack.Screen name="Scanner" component={ScannerScreen} />
+        <Stack.Screen name="SeeAll" component={SeeAllScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="Orders" component={OrdersScreen} />
+        <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    </NotificationProvider>
   );
 }

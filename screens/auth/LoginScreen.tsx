@@ -13,13 +13,14 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import PrimaryButton from '../components/PrimaryButton';
-import AppStateManager from '../utils/AppStateManager';
+import PrimaryButton from '../../components/PrimaryButton';
+import { authApi } from '../../services/api';
+import AppStateManager from '../../utils/AppStateManager';
 
 const { width, height } = Dimensions.get('window');
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('imshuvo97@gmail.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -62,33 +63,56 @@ export default function LoginScreen({ navigation }: any) {
     return () => clearInterval(interval);
   }, []);
 
+  const [error, setError] = useState('');
+
   const handleLogin = async () => {
     if (isLoading) return;
 
+    // Validate input
+    if (!email.trim()) {
+      setError('Vui lòng nhập email');
+      return;
+    }
+    if (!password.trim()) {
+      setError('Vui lòng nhập mật khẩu');
+      return;
+    }
+
     setIsLoading(true);
+    setError('');
+
     try {
       console.log('Login:', { email, password });
 
-      // Giả lập API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Call real API
+      const response = await authApi.login({ email, password });
 
-      // Lưu trạng thái đăng nhập
-      const appStateManager = AppStateManager.getInstance();
-      const mockToken = 'mock_jwt_token_' + Date.now();
-      const mockUserData = {
-        id: 1,
-        email: email,
-        name: 'User',
-        avatar: null
-      };
+      if (response.success && response.data) {
+        // Save login data
+        const appStateManager = AppStateManager.getInstance();
+        await appStateManager.saveLoginData(response.data.token || response.data.accessToken, response.data.user);
 
-      await appStateManager.saveLoginData(mockToken, mockUserData);
+        // Navigate to main screen
+        navigation.replace('Root');
+      } else {
+        throw new Error(response.message || 'Đăng nhập thất bại');
+      }
+    } catch (error: any) {
+      let errorMessage = 'Đăng nhập thất bại';
 
-      // Chuyển đến màn hình chính
-      navigation.replace('Root');
-    } catch (error) {
-      console.error('Login error:', error);
-      // Có thể hiển thị thông báo lỗi ở đây
+      // The AuthApi already handles error messages, so just use them
+      if (error.message) {
+        errorMessage = error.message;
+      }
+
+      // Additional network error handling
+      if (error.message?.includes('timeout')) {
+        errorMessage = 'Kết nối timeout, vui lòng kiểm tra mạng';
+      } else if (error.message?.includes('Network request failed')) {
+        errorMessage = 'Không thể kết nối đến server';
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +151,7 @@ export default function LoginScreen({ navigation }: any) {
           {/* Logo */}
           <View style={styles.logoContainer}>
             <Animated.Image
-              source={require('../assets/images/carot.png')}
+              source={require('../../assets/images/carot.png')}
               style={[
                 styles.carrotLogo,
                 {
@@ -140,8 +164,8 @@ export default function LoginScreen({ navigation }: any) {
 
           {/* Title */}
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Loging</Text>
-            <Text style={styles.subtitle}>Enter your emails and password</Text>
+            <Text style={styles.title}>Đăng Nhập</Text>
+            <Text style={styles.subtitle}>Nhập email và mật khẩu của bạn</Text>
           </View>
 
           {/* Form */}
@@ -155,6 +179,9 @@ export default function LoginScreen({ navigation }: any) {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                placeholder="Nhập email của bạn"
                 placeholderTextColor="#7C7C7C"
               />
               <View style={styles.inputUnderline} />
@@ -162,14 +189,14 @@ export default function LoginScreen({ navigation }: any) {
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Password</Text>
+              <Text style={styles.inputLabel}>Mật Khẩu</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu của bạn"
                   placeholderTextColor="#7C7C7C"
                 />
                 <TouchableOpacity
@@ -191,14 +218,22 @@ export default function LoginScreen({ navigation }: any) {
               style={styles.forgotPassword}
               onPress={handleForgotPassword}
             >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              <Text style={styles.forgotPasswordText}>Quên Mật Khẩu?</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Error Message */}
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={20} color="#E53E3E" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
           {/* Login Button */}
           <View style={styles.buttonContainer}>
             <PrimaryButton
-              title={isLoading ? "Logging In..." : "Log In"}
+              title={isLoading ? "Đang đăng nhập..." : "Đăng Nhập"}
               onPress={handleLogin}
               disabled={isLoading}
             />
@@ -207,9 +242,9 @@ export default function LoginScreen({ navigation }: any) {
           {/* Signup Link */}
           <View style={styles.signupContainer}>
             <Text style={styles.signupText}>
-              Don't have an account?{' '}
+              Chưa có tài khoản?{' '}
               <Text style={styles.signupLink} onPress={handleSignup}>
-                Singup
+                Đăng Ký
               </Text>
             </Text>
           </View>
@@ -304,6 +339,23 @@ const styles = StyleSheet.create({
   forgotPasswordText: {
     fontSize: 14,
     color: '#7C7C7C',
+  },
+  // Error styles
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F5',
+    borderColor: '#FED7D7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 20,
+  },
+  errorText: {
+    color: '#E53E3E',
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
   },
   // Button styles
   buttonContainer: {
