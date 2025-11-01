@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Keyboard, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 import { useNotification } from '../../contexts/NotificationContext';
 import OrderApi, { OrderDetail, OrderResponse, ReturnDetailRequest } from '../../services/api/OrderApi';
 import ProductApi from '../../services/api/ProductApi';
@@ -462,7 +462,11 @@ const OrderDetailScreen: React.FC = () => {
         animationType="slide"
         onRequestClose={() => !submittingReturn && setShowReturnModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Trả Hàng</Text>
@@ -479,6 +483,7 @@ const OrderDetailScreen: React.FC = () => {
                 style={styles.modalBody}
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 20 }}
               >
                 <Text style={styles.sectionTitle}>Chọn sản phẩm muốn trả:</Text>
               {Array.isArray(enrichedDetails) && enrichedDetails.length > 0 ? (
@@ -576,7 +581,7 @@ const OrderDetailScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Cancel Order Modal */}
@@ -586,7 +591,11 @@ const OrderDetailScreen: React.FC = () => {
         animationType="fade"
         onRequestClose={() => !cancellingOrder && setShowCancelModal(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+        >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Hủy Đơn Hàng</Text>
@@ -599,7 +608,12 @@ const OrderDetailScreen: React.FC = () => {
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.modalBody}>
+              <ScrollView
+                style={styles.modalBody}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
                 <Text style={styles.sectionTitle}>Ghi chú (tùy chọn):</Text>
                 <TextInput
                   style={styles.reasonInput}
@@ -614,7 +628,7 @@ const OrderDetailScreen: React.FC = () => {
                   blurOnSubmit={true}
                   onSubmitEditing={() => Keyboard.dismiss()}
                 />
-              </View>
+              </ScrollView>
             </TouchableWithoutFeedback>
 
             <View style={styles.modalFooter}>
@@ -638,7 +652,7 @@ const OrderDetailScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
