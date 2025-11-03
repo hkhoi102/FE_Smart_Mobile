@@ -38,9 +38,9 @@ const ProductDetailScreen: React.FC = () => {
 
   // Default images for products (fallback when no image from API)
   const defaultProductImages = [
-    require('../../assets/images/product/rau.png'),
-    require('../../assets/images/product/tao.png'),
-    require('../../assets/images/product/thit.png'),
+  require('../../assets/images/product/OIP.webp'),
+  require('../../assets/images/product/OIP.webp'),
+  require('../../assets/images/product/OIP.webp'),
   ];
 
   // Fetch product details when component mounts
@@ -61,10 +61,19 @@ const ProductDetailScreen: React.FC = () => {
       if (productWithPrice) {
         console.log('✅ Product with price data:', productWithPrice);
 
+        // Choose image based on selected unit when available
+        const units: any[] = (productWithPrice as any).units || (productWithPrice as any).productUnits || [];
+        const selectedUnit = unitId !== undefined
+          ? units.find((u: any) => u.id === unitId)
+          : (units.find((u: any) => u.isDefault) || units.find((u: any) => u.currentPrice != null));
+        const unitImageUrl = selectedUnit?.imageUrl;
+        const baseImage = (productWithPrice as any).imageUrl ? { uri: (productWithPrice as any).imageUrl } : productWithPrice.displayImage;
+        const finalImage = unitImageUrl ? { uri: unitImageUrl } : (baseImage || defaultProductImages[0]);
+
         // Use fallback image if no image from API
         const processedProduct: ProductWithPrice = {
           ...productWithPrice,
-          displayImage: productWithPrice.displayImage || defaultProductImages[0],
+          displayImage: finalImage,
         };
 
         console.log('🎨 Processed product with price:', processedProduct);
@@ -255,16 +264,22 @@ const ProductDetailScreen: React.FC = () => {
               {(() => {
                 if (loading) return 'Đang tải...';
                 if (!product) return 'Liên hệ';
-                // Find the selected unit or default unit
-                const selectedUnit = unitId !== undefined
-                  ? product.units?.find(u => u.id === unitId)
-                  : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined);
-
-                if (selectedUnit && selectedUnit.currentPrice !== null && selectedUnit.currentPrice !== undefined) {
-                  return `${selectedUnit.currentPrice.toLocaleString()}đ`;
+                // If a specific unit is selected, only use that unit's price
+                if (unitId !== undefined) {
+                  const selectedUnit = product.units?.find(u => u.id === unitId);
+                  if (selectedUnit && selectedUnit.currentPrice != null && selectedUnit.currentPrice > 0) {
+                    return `${selectedUnit.currentPrice.toLocaleString()}đ`;
+                  }
+                  return 'Liên hệ';
                 }
-                // Fallback to product price
-                return product.displayPrice || (product.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ');
+                // Otherwise use default/valid unit or fallback to product
+                const fallbackUnit = product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice != null && u.currentPrice > 0);
+                if (fallbackUnit && fallbackUnit.currentPrice != null && fallbackUnit.currentPrice > 0) {
+                  return `${fallbackUnit.currentPrice.toLocaleString()}đ`;
+                }
+                return product.currentPrice != null && product.currentPrice > 0
+                  ? `${product.currentPrice.toLocaleString()}đ`
+                  : 'Liên hệ';
               })()}
             </Text>
             {(() => {
@@ -328,28 +343,32 @@ const ProductDetailScreen: React.FC = () => {
         <View style={{ height: 70 }} />
       </View>
       <View style={styles.fixedAddBtn}>
-        <PrimaryButton title="Thêm Vào Giỏ" onPress={() => {
-          if (!product) return;
-          // Use unitId from params if available, otherwise find default unit
+        {(() => {
+          if (!product) return null;
           const selectedUnit = unitId !== undefined
             ? product.units?.find(u => u.id === unitId)
-            : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice !== null && u.currentPrice !== undefined);
-
-          const finalUnitId = selectedUnit?.id || product.id;
-          const priceNum = selectedUnit?.currentPrice ?? product.currentPrice ?? 0;
-
-          CartStore.addItem({
-            id: String(finalUnitId),
-            name: product.name,
-            price: typeof priceNum === 'number' ? priceNum : 0,
-            image: product.displayImage,
-            productUnitId: selectedUnit?.id ? Number(selectedUnit.id) : undefined,
-            productId: Number(product.id) || undefined,
-            categoryId: (product as any).categoryId,
-          });
-          showSuccess('Đã thêm vào giỏ hàng');
-          (navigation as any).navigate({ name: 'Root', params: { screen: 'Cart' } });
-        }} />
+            : product.units?.find(u => u.isDefault) || product.units?.find(u => u.currentPrice != null && u.currentPrice > 0);
+          const hasPrice = unitId !== undefined
+            ? (selectedUnit?.currentPrice != null && selectedUnit.currentPrice > 0)
+            : ((selectedUnit?.currentPrice != null && selectedUnit.currentPrice > 0) || (product.currentPrice != null && product.currentPrice > 0));
+          if (!hasPrice) return null;
+          const onPress = () => {
+            const finalUnitId = selectedUnit?.id || product.id;
+            const priceNum = selectedUnit?.currentPrice ?? product.currentPrice ?? 0;
+            CartStore.addItem({
+              id: String(finalUnitId),
+              name: product.name,
+              price: typeof priceNum === 'number' ? priceNum : 0,
+              image: product.displayImage,
+              productUnitId: selectedUnit?.id ? Number(selectedUnit.id) : undefined,
+              productId: Number(product.id) || undefined,
+              categoryId: (product as any).categoryId,
+            });
+            showSuccess('Đã thêm vào giỏ hàng');
+            (navigation as any).navigate({ name: 'Root', params: { screen: 'Cart' } });
+          };
+          return <PrimaryButton title={'Thêm Vào Giỏ'} onPress={onPress} />;
+        })()}
       </View>
     </View>
   );

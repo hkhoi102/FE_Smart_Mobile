@@ -50,6 +50,7 @@ const ExclusiveOfferSection: React.FC<ExclusiveOfferSectionProps> = ({ title, da
             <ProductCard
               key={item?.id ? `section-${title || 'no-title'}-product-${item.id}-${idx}` : `section-${title || 'no-title'}-product-index-${idx}`}
               {...item}
+              hideAddButton={!item.price || item.price.trim().length === 0}
               onPress={() => onProductPress && onProductPress(item)}
               onAdd={() => onAddToCart && onAddToCart(item)}
             />

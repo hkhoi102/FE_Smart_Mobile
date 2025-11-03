@@ -140,7 +140,7 @@ export default function HomeScreen() {
         }
 
         const baseName = product.name ?? 'Sản phẩm';
-        const image = product.displayImage ?? require('../../assets/images/illustration.png');
+        const image = product.displayImage ?? require('../../assets/images/product/OIP.webp');
         const units: any[] = Array.isArray(product.units) ? product.units : (Array.isArray(product.productUnits) ? product.productUnits : []);
 
         if (units.length > 0) {
@@ -150,6 +150,7 @@ export default function HomeScreen() {
             const name = `${baseName} (${u.unitName || 'đơn vị'})`;
             const priceNumber = (u.currentPrice != null ? u.currentPrice : (u.convertedPrice != null ? u.convertedPrice : product.currentPrice));
             const price = priceNumber != null ? formatVND(priceNumber) : '';
+            const unitImage = u.imageUrl ? { uri: u.imageUrl } : image;
 
             // Find matching unit data from best selling
             const unitData = productInfo.units.find((ud: any) => ud.unitId === u.id);
@@ -158,7 +159,7 @@ export default function HomeScreen() {
 
             const desc = `SL: ${totalQuantity}, DT: ${formatVND(typeof totalRevenue === 'number' ? totalRevenue : Number(totalRevenue))}`;
 
-            cards.push({ id, image, name, desc, price });
+            cards.push({ id, image: unitImage, name, desc, price });
           });
         } else {
           // Fallback if no units
@@ -169,7 +170,8 @@ export default function HomeScreen() {
           const name = baseName;
           const price = product.currentPrice != null ? formatVND(product.currentPrice) : '';
           const desc = `SL: ${totalQuantity}, DT: ${formatVND(typeof totalRevenue === 'number' ? totalRevenue : Number(totalRevenue))}`;
-          cards.push({ id, image, name, desc, price });
+          // No units: always show pending image
+          cards.push({ id, image: require('../../assets/images/product/OIP.webp'), name, desc, price });
         }
       } catch (e) {
         console.error(`Error processing product ${productId}:`, e);
@@ -182,7 +184,7 @@ export default function HomeScreen() {
   const mapProductsToCards = (items: any[]): any[] => {
     const cards: any[] = [];
     items.forEach((p: any, idx: number) => {
-      const image = p.imageUrl ? { uri: p.imageUrl } : require('../../assets/images/illustration.png');
+      const fallbackImage = p.imageUrl ? { uri: p.imageUrl } : require('../../assets/images/product/OIP.webp');
       const baseName = p.name ?? 'Sản phẩm';
       const desc = p.description ?? '';
       const units: any[] = Array.isArray(p.productUnits) ? p.productUnits : [];
@@ -194,12 +196,14 @@ export default function HomeScreen() {
           const name = `${baseName} (${u.unitName || 'đơn vị'})`;
           const priceNumber = (u.currentPrice != null ? u.currentPrice : (u.convertedPrice != null ? u.convertedPrice : p.currentPrice));
           const price = priceNumber != null ? formatVND(priceNumber) : '';
-          cards.push({ id, image, name, desc, price });
+          const unitImage = u.imageUrl ? { uri: u.imageUrl } : fallbackImage;
+          cards.push({ id, image: unitImage, name, desc, price });
         });
       } else {
         const id = String(p.id ?? idx);
         const price = p.currentPrice != null ? formatVND(p.currentPrice) : '';
-        cards.push({ id, image, name: baseName, desc, price });
+        // No units: always show pending image
+        cards.push({ id, image: require('../../assets/images/product/OIP.webp'), name: baseName, desc, price });
       }
     });
     return cards;
@@ -476,7 +480,11 @@ export default function HomeScreen() {
           contentContainerStyle={{ paddingBottom: 24 }}
           renderItem={({ item }) => (
             <TouchableOpacity activeOpacity={0.8} onPress={() => handleProductPress(item)}>
-              <ProductCard {...item} onAdd={() => handleAddToCart(item)} />
+              <ProductCard
+                {...item}
+                hideAddButton={!item.price || item.price.trim().length === 0}
+                onAdd={() => handleAddToCart(item)}
+              />
             </TouchableOpacity>
           )}
         />

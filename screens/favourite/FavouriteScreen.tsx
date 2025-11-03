@@ -74,6 +74,7 @@ const FavouriteScreen: React.FC = () => {
             if (favouriteProducts.length === 0) return;
 
             let addedCount = 0;
+            let skippedCount = 0;
 
             favouriteProducts.forEach((item) => {
               try {
@@ -82,6 +83,12 @@ const FavouriteScreen: React.FC = () => {
                 if (item.price) {
                   const priceStr = item.price.replace(/[^\d]/g, ''); // Remove all non-digit characters
                   price = parseInt(priceStr, 10) || 0;
+                }
+
+                // Skip items without valid price
+                if (!price || price <= 0) {
+                  skippedCount++;
+                  return;
                 }
 
                 // Determine cart item ID and productUnitId
@@ -122,7 +129,10 @@ const FavouriteScreen: React.FC = () => {
               }
             });
 
-            showSuccess(`Đã thêm ${addedCount} sản phẩm vào giỏ hàng`);
+            const message = skippedCount > 0
+              ? `Đã thêm ${addedCount} sản phẩm (bỏ qua ${skippedCount} không có giá)`
+              : `Đã thêm ${addedCount} sản phẩm vào giỏ hàng`;
+            showSuccess(message);
 
             // Navigate to cart
             navigation.navigate('Root', { screen: 'Cart' });

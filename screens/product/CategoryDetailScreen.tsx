@@ -24,11 +24,25 @@ const defaultProductImages = [
 
 // Process products for display
 const processProducts = (products: Product[]): ProductWithPrice[] => {
-  return products.map((product, index) => ({
-    ...product,
-    displayPrice: product.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ',
-    displayImage: product.imageUrl ? { uri: product.imageUrl } : defaultProductImages[index % defaultProductImages.length],
-  }));
+  return products.map((product, index) => {
+    // If item is marked pending image (no units), show the generic waiting image
+    const isPending = (product as any).pendingImage === true;
+    if (isPending) {
+      return {
+        ...product,
+        displayPrice: product.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ',
+        displayImage: require('../../assets/images/product/OIP.webp'),
+      };
+    }
+
+    // Use unit image if available, otherwise fallback to product image, then category defaults
+    const imageUrl = (product as any).unitImageUrl || product.imageUrl;
+    return {
+      ...product,
+      displayPrice: product.currentPrice ? `${product.currentPrice.toLocaleString()}đ` : 'Liên hệ',
+      displayImage: imageUrl ? { uri: imageUrl } : require('../../assets/images/product/OIP.webp'),
+    };
+  });
 };
 
 const CategoryDetailScreen: React.FC = () => {
@@ -85,41 +99,29 @@ const CategoryDetailScreen: React.FC = () => {
         const productsWithPrices: any[] = [];
 
         response.data.forEach((product) => {
-          if (product.productUnits && product.productUnits.length > 0) {
-            let hasValidUnit = false;
-
-            // Create a separate item for each unit
+          if (Array.isArray(product.productUnits) && product.productUnits.length > 0) {
+            // Always create a separate item for each unit, even if price is null
             product.productUnits.forEach((unit: any) => {
-              // Only show units that have a valid price
-              if (unit.currentPrice !== null && unit.currentPrice !== undefined) {
-                hasValidUnit = true;
-                productsWithPrices.push({
-                  ...product,
-                  id: `${product.id}_${unit.id}`, // Unique ID for each unit
-                  name: `${product.name} (${unit.unitName})`, // Show unit in name
-                  currentPrice: unit.currentPrice,
-                  priceUnit: unit.unitName || 'đơn vị',
-                  unitDescription: unit.unitDescription,
-                  isDefault: unit.isDefault,
-                  convertedPrice: unit.convertedPrice,
-                });
-              }
-            });
-
-            // If no valid units found, add the product without price
-            if (!hasValidUnit) {
+              const unitPrice = (unit.currentPrice != null) ? unit.currentPrice : (unit.convertedPrice != null ? unit.convertedPrice : 0);
               productsWithPrices.push({
                 ...product,
-                currentPrice: 0,
-                priceUnit: 'đơn vị',
+                id: `${product.id}_${unit.id}`,
+                name: `${product.name} (${unit.unitName})`,
+                currentPrice: unitPrice,
+                priceUnit: unit.unitName || 'đơn vị',
+                unitDescription: unit.unitDescription,
+                isDefault: unit.isDefault,
+                convertedPrice: unit.convertedPrice,
+                unitImageUrl: unit.imageUrl,
               });
-            }
+            });
           } else {
             // If no units, add as single item
             productsWithPrices.push({
               ...product,
               currentPrice: 0,
               priceUnit: 'đơn vị',
+              pendingImage: true,
             });
           }
         });
@@ -201,38 +203,44 @@ const CategoryDetailScreen: React.FC = () => {
 
   // removed brand toggling
 
-  const renderProductItem = ({ item }: { item: ProductWithPrice }) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      onPress={() => handleProductPress(item)}
-      activeOpacity={0.8}
-    >
-      <Image source={item.displayImage} style={styles.productImage} />
-      <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.productDesc}>{item.description || 'Sản phẩm chất lượng'}</Text>
-      <View style={styles.productFooter}>
-        <Text style={styles.productPrice}>{item.displayPrice}</Text>
-        <AddButton onPress={() => {
-          const composed = item.id.toString();
-          const unitIdStr = composed.includes('_') ? composed.split('_')[1] : composed;
-          const productIdStr = composed.includes('_') ? composed.split('_')[0] : composed;
-          const priceNum = typeof item.currentPrice === 'number' ? item.currentPrice : 0;
-          CartStore.addItem({
-            id: unitIdStr,
-            name: item.name,
-            price: priceNum,
-            image: item.displayImage,
-            productUnitId: Number(unitIdStr) || undefined,
-            productId: Number(productIdStr) || undefined,
-            categoryId: (item as any).categoryId,
-          });
-          showSuccess('Đã thêm vào giỏ hàng');
-          // Optional: navigate to Cart to verify
-          navigation.navigate({ name: 'Root', params: { screen: 'Cart' } } as any);
-        }} />
-      </View>
-    </TouchableOpacity>
-  );
+  const renderProductItem = ({ item }: { item: ProductWithPrice }) => {
+    const hasPrice = typeof item.currentPrice === 'number' && item.currentPrice > 0;
+    return (
+      <TouchableOpacity
+        style={styles.productCard}
+        onPress={() => handleProductPress(item)}
+        activeOpacity={0.8}
+      >
+        <Image source={item.displayImage} style={styles.productImage} />
+        <Text style={styles.productName} numberOfLines={2} ellipsizeMode="tail">{item.name}</Text>
+        <Text style={styles.productDesc} numberOfLines={2} ellipsizeMode="tail">{item.description || 'Sản phẩm chất lượng'}</Text>
+        <View style={styles.productFooter}>
+          <Text style={styles.productPrice} numberOfLines={1} ellipsizeMode="tail">{hasPrice ? item.displayPrice : ''}</Text>
+          {hasPrice ? (
+            <AddButton onPress={() => {
+              const composed = item.id.toString();
+              const unitIdStr = composed.includes('_') ? composed.split('_')[1] : composed;
+              const productIdStr = composed.includes('_') ? composed.split('_')[0] : composed;
+              const priceNum = typeof item.currentPrice === 'number' ? item.currentPrice : 0;
+              CartStore.addItem({
+                id: unitIdStr,
+                name: item.name,
+                price: priceNum,
+                image: item.displayImage,
+                productUnitId: Number(unitIdStr) || undefined,
+                productId: Number(productIdStr) || undefined,
+                categoryId: (item as any).categoryId,
+              });
+              showSuccess('Đã thêm vào giỏ hàng');
+              navigation.navigate({ name: 'Root', params: { screen: 'Cart' } } as any);
+            }} />
+          ) : (
+            <Text style={styles.contactLabel}>Liên hệ</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   // Render loading state
   if (loading) {
@@ -423,11 +431,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#222',
     marginBottom: 4,
+    lineHeight: 22,
+    height: 44, // clamp 2 lines
   },
   productDesc: {
     fontSize: 14,
     color: '#B6B6B6',
     marginBottom: 12,
+    lineHeight: 20,
+    height: 40, // clamp 2 lines
   },
   productFooter: {
     flexDirection: 'row',
@@ -438,6 +450,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#222',
+  },
+  contactLabel: {
+    color: '#10B981',
+    fontSize: 14,
+    fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
