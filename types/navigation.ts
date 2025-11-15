@@ -29,6 +29,10 @@ export type RootStackParamList = {
   Profile: undefined;
   Orders: undefined;
   OrderDetail: { orderId: number };
+  Chat: undefined;
+  About: undefined;
+  Notifications: undefined;
+  Help: undefined;
 };
 
 export type TabParamList = {

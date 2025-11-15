@@ -488,94 +488,112 @@ export default function HomeScreen() {
             </TouchableOpacity>
           )}
         />
+        {/* Floating Chat Button */}
+        <TouchableOpacity
+          style={styles.chatButton}
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Chat')}
+        >
+          <MaterialIcons name="chat" size={28} color="#fff" />
+        </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
-      {renderHeader()}
-      {search.trim().length === 0 && (
-        <View style={styles.carouselContainer}>
-          <ScrollView
-            ref={scrollRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            pagingEnabled
-            onScroll={onScroll}
-            scrollEventThrottle={16}
-          >
-            {banners.map((banner, idx) => (
-              <View style={styles.bannerSlide} key={idx}>
-                <Image source={banner.image} style={styles.bannerImage} />
-                <View style={styles.bannerTextContainer}>
-                  <Text style={styles.bannerTitle}>{banner.title}</Text>
-                  <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        {renderHeader()}
+        {search.trim().length === 0 && (
+          <View style={styles.carouselContainer}>
+            <ScrollView
+              ref={scrollRef}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              onScroll={onScroll}
+              scrollEventThrottle={16}
+            >
+              {banners.map((banner, idx) => (
+                <View style={styles.bannerSlide} key={idx}>
+                  <Image source={banner.image} style={styles.bannerImage} />
+                  <View style={styles.bannerTextContainer}>
+                    <Text style={styles.bannerTitle}>{banner.title}</Text>
+                    <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
-          </ScrollView>
-          <View style={styles.indicatorContainer}>
-            {banners.map((_, idx) => (
-              <View
-                key={idx}
-                style={[styles.indicatorDot, currentIndex === idx && styles.indicatorDotActive]}
-              />
-            ))}
+              ))}
+            </ScrollView>
+            <View style={styles.indicatorContainer}>
+              {banners.map((_, idx) => (
+                <View
+                  key={idx}
+                  style={[styles.indicatorDot, currentIndex === idx && styles.indicatorDotActive]}
+                />
+              ))}
+            </View>
           </View>
-        </View>
-      )}
-      {search.trim().length > 0 && (
-        <ExclusiveOfferSection
-          title=""
-          data={searchResults}
+        )}
+        {search.trim().length > 0 && (
+          <ExclusiveOfferSection
+            title=""
+            data={searchResults}
+            onProductPress={handleProductPress}
+            onAddToCart={handleAddToCart}
+          />
+        )}
+        {search.trim().length > 0 && related.length > 0 && (
+          <ExclusiveOfferSection
+            title="Sản Phẩm Liên Quan"
+            data={related}
+            onSeeAll={() => { setSeeAllTitle('Sản Phẩm Liên Quan'); setSeeAllItems(related); setSeeAllVisible(true); }}
+            onProductPress={handleProductPress}
+            onAddToCart={handleAddToCart}
+          />
+        )}
+        {/* <ExclusiveOfferSection
+          title="Bán Chạy Nhất"
+          data={bestSelling}
+          onSeeAll={() => { setSeeAllTitle('Bán Chạy Nhất'); setSeeAllItems(bestSelling); setSeeAllVisible(true); }}
           onProductPress={handleProductPress}
           onAddToCart={handleAddToCart}
-        />
-      )}
-      {search.trim().length > 0 && related.length > 0 && (
-        <ExclusiveOfferSection
-          title="Sản Phẩm Liên Quan"
-          data={related}
-          onSeeAll={() => { setSeeAllTitle('Sản Phẩm Liên Quan'); setSeeAllItems(related); setSeeAllVisible(true); }}
-          onProductPress={handleProductPress}
-          onAddToCart={handleAddToCart}
-        />
-      )}
-      {/* <ExclusiveOfferSection
-        title="Bán Chạy Nhất"
-        data={bestSelling}
-        onSeeAll={() => { setSeeAllTitle('Bán Chạy Nhất'); setSeeAllItems(bestSelling); setSeeAllVisible(true); }}
-        onProductPress={handleProductPress}
-        onAddToCart={handleAddToCart}
-      /> */}
-      {search.trim().length === 0 && Array.isArray(categories) && categories.length > 0 && categories.map((category: any) => {
-        try {
-          if (!category || !category.id) return null;
-          const products = categoryProducts[category.id] || [];
-          if (!Array.isArray(products) || products.length === 0) return null;
+        /> */}
+        {search.trim().length === 0 && Array.isArray(categories) && categories.length > 0 && categories.map((category: any) => {
+          try {
+            if (!category || !category.id) return null;
+            const products = categoryProducts[category.id] || [];
+            if (!Array.isArray(products) || products.length === 0) return null;
 
-          return (
-            <ExclusiveOfferSection
-              key={category.id}
-              title={category.name || 'Danh mục'}
-              data={products}
-              onSeeAll={() => {
-                navigation.navigate('CategoryDetail', {
-                  categoryId: category.id,
-                  categoryName: category.name || 'Danh mục',
-                });
-              }}
-              onProductPress={handleProductPress}
-              onAddToCart={handleAddToCart}
-            />
-          );
-        } catch (e) {
-          console.error('Error rendering category:', category, e);
-          return null;
-        }
-      })}
-    </ScrollView>
+            return (
+              <ExclusiveOfferSection
+                key={category.id}
+                title={category.name || 'Danh mục'}
+                data={products}
+                onSeeAll={() => {
+                  navigation.navigate('CategoryDetail', {
+                    categoryId: category.id,
+                    categoryName: category.name || 'Danh mục',
+                  });
+                }}
+                onProductPress={handleProductPress}
+                onAddToCart={handleAddToCart}
+              />
+            );
+          } catch (e) {
+            console.error('Error rendering category:', category, e);
+            return null;
+          }
+        })}
+      </ScrollView>
+      {/* Floating Chat Button */}
+      <TouchableOpacity
+        style={styles.chatButton}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Chat')}
+      >
+        <MaterialIcons name="chat" size={28} color="#fff" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
@@ -583,8 +601,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  scrollView: {
+    flex: 1,
     padding: 20,
-    // alignItems: 'center', // Bỏ dòng này để tránh bóp chiều rộng
     paddingTop: 50,
   },
   suggestionChip: {
@@ -701,5 +721,24 @@ const styles = StyleSheet.create({
     color: '#10B981',
     fontWeight: '600',
     fontSize: 15,
+  },
+  chatButton: {
+    position: 'absolute',
+    bottom: 100,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#6FCF97',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
 });

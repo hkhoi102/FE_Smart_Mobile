@@ -5,9 +5,9 @@ export const API_CONFIG = {
   // For development - change these IPs based on your network
   DEVELOPMENT: {
     ANDROID_EMULATOR: 'http://10.0.2.2:8085',
-    ANDROID_DEVICE: 'http://192.168.31.102:8085', // Your actual IP
+    ANDROID_DEVICE: 'http://103.229.52.246:8085', // Your actual IP
     IOS_SIMULATOR: 'http://localhost:8085',
-    IOS_DEVICE: 'http://192.168.31.102:8085', // Your actual IP
+    IOS_DEVICE: 'http://103.229.52.246:8085', // Your actual IP
   },
   // For production
   PRODUCTION: {

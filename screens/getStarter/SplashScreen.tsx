@@ -19,8 +19,8 @@ export default function SplashScreen({ navigation }: any) {
         navigation.replace(initialScreen);
       } catch (error) {
         console.error('Error initializing app:', error);
-        // Mặc định chuyển đến Onboarding nếu có lỗi
-        navigation.replace('Onboarding');
+        // Mặc định chuyển đến Login nếu có lỗi
+        navigation.replace('Login');
       }
     };
 

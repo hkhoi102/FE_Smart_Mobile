@@ -39,6 +39,10 @@ import FilterScreen from '../screens/product/filter/FilterScreen';
 import ProductDetailScreen from '../screens/product/ProductDetailScreen';
 import SeeAllScreen from '../screens/product/SeeAllScreen';
 import ScannerScreen from '../screens/scanner/ScannerScreen';
+import ChatScreen from '../screens/chat/ChatScreen';
+import AboutScreen from '../screens/account/AboutScreen';
+import NotificationScreen from '../screens/account/NotificationScreen';
+import HelpScreen from '../screens/account/HelpScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -177,6 +181,10 @@ export default function AppNavigator() {
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Orders" component={OrdersScreen} />
         <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
+        <Stack.Screen name="Chat" component={ChatScreen} />
+        <Stack.Screen name="About" component={AboutScreen} />
+        <Stack.Screen name="Notifications" component={NotificationScreen} />
+        <Stack.Screen name="Help" component={HelpScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     </NotificationProvider>

@@ -129,17 +129,12 @@ class AppStateManager {
 
   // Xác định màn hình khởi động
   async getInitialScreen(): Promise<string> {
-    const isFirstLaunch = await this.checkFirstLaunch();
-
-    if (isFirstLaunch) {
-      return 'Onboarding'; // Màn hình Get Started cho người dùng mới
+    // Bỏ qua Onboarding, Verification, Location - đi thẳng đến Login
+    const isLoggedIn = await this.checkLoginStatus();
+    if (isLoggedIn) {
+      return 'Root'; // Màn hình Home cho người dùng đã đăng nhập
     } else {
-      const isLoggedIn = await this.checkLoginStatus();
-      if (isLoggedIn) {
-        return 'Root'; // Màn hình Home cho người dùng đã đăng nhập
-      } else {
-        return 'Login'; // Màn hình Login cho người dùng chưa đăng nhập
-      }
+      return 'Login'; // Màn hình Login cho người dùng chưa đăng nhập
     }
   }
 

@@ -3,8 +3,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { authApi, CustomerApi, UserProfile } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { authApi, CustomerApi, UserProfile } from '../../services/api';
 import { RootStackParamList } from '../../types/navigation';
 import AppStateManager from '../../utils/AppStateManager';
 
@@ -18,6 +18,11 @@ const menuItems = [
     id: '2',
     title: 'Thông Tin Cá Nhân',
     icon: 'person-outline',
+  },
+  {
+    id: '3',
+    title: 'Trợ Lý AI',
+    icon: 'chatbubble-ellipses-outline',
   },
   {
     id: '4',
@@ -63,6 +68,14 @@ const AccountScreen: React.FC = () => {
           navigation.navigate('Profile');
         } else if (item.title === 'Đơn Hàng') {
           navigation.navigate('Orders');
+        } else if (item.title === 'Trợ Lý AI') {
+          navigation.navigate('Chat');
+        } else if (item.title === 'Thông Báo') {
+          navigation.navigate('Notifications');
+        } else if (item.title === 'Trợ Giúp') {
+          navigation.navigate('Help');
+        } else if (item.title === 'Giới Thiệu') {
+          navigation.navigate('About');
         }
       }}
     >
@@ -131,9 +144,6 @@ const AccountScreen: React.FC = () => {
         <View style={styles.profileInfo}>
           <View style={styles.nameRow}>
             <Text style={styles.userName}>{me?.fullName || '—'}</Text>
-            <TouchableOpacity style={styles.editButton}>
-              <Ionicons name="pencil" size={16} color="#10B981" />
-            </TouchableOpacity>
           </View>
           <Text style={styles.userEmail}>{me?.email || '—'}</Text>
         </View>
@@ -195,10 +205,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#222',
-    marginRight: 8,
-  },
-  editButton: {
-    padding: 4,
   },
   userEmail: {
     fontSize: 14,

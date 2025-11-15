@@ -29,7 +29,7 @@ const CartScreen: React.FC = () => {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showOrderFailedModal, setShowOrderFailedModal] = useState(false);
   const [orderStatus, setOrderStatus] = useState<'pending' | 'success' | 'failed'>('pending');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('COD');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [qrContent, setQrContent] = useState<string | undefined>();
   const [qrLoadError, setQrLoadError] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<number | undefined>();
@@ -479,9 +479,10 @@ const CartScreen: React.FC = () => {
                   <View style={[styles.checkoutItem, styles.paymentMethodContainer]}>
                     <Text style={styles.checkoutItemLabel}>Phương thức thanh toán</Text>
                     <View style={styles.paymentMethodButtons}>
-                      <TouchableOpacity onPress={() => setPaymentMethod('COD')} style={[styles.payMethodBtn, paymentMethod==='COD' && styles.payMethodBtnActive]}>
+                      {/* COD button hidden per user request */}
+                      {/* <TouchableOpacity onPress={() => setPaymentMethod('COD')} style={[styles.payMethodBtn, paymentMethod==='COD' && styles.payMethodBtnActive]}>
                         <Text style={[styles.payMethodText, paymentMethod==='COD' && styles.payMethodTextActive]}>COD</Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
                       <TouchableOpacity onPress={() => setPaymentMethod('BANK_TRANSFER')} style={[styles.payMethodBtn, paymentMethod==='BANK_TRANSFER' && styles.payMethodBtnActive]}>
                         <Text style={[styles.payMethodText, paymentMethod==='BANK_TRANSFER' && styles.payMethodTextActive]}>Chuyển khoản</Text>
                       </TouchableOpacity>

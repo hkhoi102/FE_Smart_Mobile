@@ -433,7 +433,8 @@ const OrderDetailScreen: React.FC = () => {
         </View>
 
         {/* Action Buttons */}
-        {shouldShowReturnButton() ? (
+        {/* Return button hidden per user request */}
+        {/* {shouldShowReturnButton() ? (
           <TouchableOpacity
             style={styles.returnButton}
             onPress={handleReturnOrder}
@@ -442,7 +443,7 @@ const OrderDetailScreen: React.FC = () => {
             <Ionicons name="return-down-back-outline" size={20} color="#fff" />
             <Text style={styles.returnButtonText}>Trả Hàng</Text>
           </TouchableOpacity>
-        ) : null}
+        ) : null} */}
         {shouldShowCancelButton() ? (
           <TouchableOpacity
             style={styles.cancelOrderButton}

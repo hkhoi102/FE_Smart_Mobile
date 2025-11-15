@@ -117,11 +117,6 @@ const ProductDetailScreen: React.FC = () => {
             <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color="#222" />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={styles.iconBtn}>
-                <Ionicons name="share-social-outline" size={22} color="#222" />
-              </TouchableOpacity>
-            </View>
           </View>
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#53B175" />
@@ -141,11 +136,6 @@ const ProductDetailScreen: React.FC = () => {
             <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color="#222" />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={styles.iconBtn}>
-                <Ionicons name="share-social-outline" size={22} color="#222" />
-              </TouchableOpacity>
-            </View>
           </View>
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>{error}</Text>
@@ -167,11 +157,6 @@ const ProductDetailScreen: React.FC = () => {
             <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color="#222" />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={styles.iconBtn}>
-                <Ionicons name="share-social-outline" size={22} color="#222" />
-              </TouchableOpacity>
-            </View>
           </View>
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Không tìm thấy sản phẩm</Text>
@@ -202,11 +187,6 @@ const ProductDetailScreen: React.FC = () => {
             <TouchableOpacity style={styles.iconBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color="#222" />
             </TouchableOpacity>
-            <View style={{ flexDirection: 'row' }}>
-              <TouchableOpacity style={styles.iconBtn}>
-                <Ionicons name="share-social-outline" size={22} color="#222" />
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
         {/* Indicator */}

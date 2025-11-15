@@ -2,8 +2,13 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import ExclusiveOfferSection from '../../components/ExclusiveOfferSection';
+import ProductCard from '../../components/ProductCard';
 import SearchBar from '../../components/SearchBar';
+import { useNotification } from '../../contexts/NotificationContext';
 import CategoryApi from '../../services/api/CategoryApi';
+import ProductApi from '../../services/api/ProductApi';
+import { CartStore } from '../../stores/CartStore';
 import { Category, CategoryWithColor } from '../../types/category';
 import { RootStackParamList } from '../../types/navigation';
 
@@ -48,7 +53,10 @@ export default function ExploreScreen() {
   const [categories, setCategories] = useState<CategoryWithColor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { showSuccess } = useNotification();
 
   // Fetch categories from API
   useEffect(() => {
@@ -115,6 +123,124 @@ export default function ExploreScreen() {
     fetchCategories();
   };
 
+  // Helper functions for product mapping
+  const formatVND = (value?: number) => {
+    if (typeof value !== 'number') return '';
+    return `${value.toLocaleString('vi-VN')}đ`;
+  };
+
+  const mapProductsToCards = (items: any[]): any[] => {
+    const cards: any[] = [];
+    items.forEach((p: any, idx: number) => {
+      const fallbackImage = p.imageUrl ? { uri: p.imageUrl } : require('../../assets/images/product/OIP.webp');
+      const baseName = p.name ?? 'Sản phẩm';
+      const desc = p.description ?? '';
+      const units: any[] = Array.isArray(p.productUnits) ? p.productUnits : [];
+
+      const listUnits = units.length > 0 ? units : [];
+      if (listUnits.length > 0) {
+        listUnits.forEach((u: any) => {
+          const id = `${p.id}_${u.id}`;
+          const name = `${baseName} (${u.unitName || 'đơn vị'})`;
+          const priceNumber = (u.currentPrice != null ? u.currentPrice : (u.convertedPrice != null ? u.convertedPrice : p.currentPrice));
+          const price = priceNumber != null ? formatVND(priceNumber) : '';
+          const unitImage = u.imageUrl ? { uri: u.imageUrl } : fallbackImage;
+          const availableQty = u.availableQuantity ?? u.quantity;
+          const inStock = availableQty !== undefined ? availableQty > 0 : undefined;
+          cards.push({ id, image: unitImage, name, desc, price, inStock, availableQuantity: availableQty });
+        });
+      } else {
+        const id = String(p.id ?? idx);
+        const price = p.currentPrice != null ? formatVND(p.currentPrice) : '';
+        const availableQty = p.availableQuantity ?? p.quantity;
+        const inStock = availableQty !== undefined ? availableQty > 0 : undefined;
+        cards.push({ id, image: require('../../assets/images/product/OIP.webp'), name: baseName, desc, price, inStock, availableQuantity: availableQty });
+      }
+    });
+    return cards;
+  };
+
+  const mapProductsToCardsAsync = async (items: any[]): Promise<any[]> => {
+    const resolved = await Promise.all(items.map(async (p: any) => {
+      if (Array.isArray(p.productUnits) && p.productUnits.length > 0) return p;
+      try {
+        const detail = await ProductApi.getProductWithPrice(Number(p.id));
+        if (detail) {
+          return {
+            ...p,
+            productUnits: detail.units ?? detail.productUnits ?? [],
+            currentPrice: detail.currentPrice,
+            imageUrl: (detail as any).imageUrl ?? p.imageUrl,
+          };
+        }
+        const full = await ProductApi.getProductById(Number(p.id));
+        const data = (full as any)?.data?.[0];
+        return data ? { ...data } : p;
+      } catch {
+        return p;
+      }
+    }));
+    return mapProductsToCards(resolved);
+  };
+
+  // Product search handler
+  const handleProductPress = (product: any) => {
+    const composed = String(product.id ?? '');
+    if (composed.includes('_')) {
+      const [productId, unitId] = composed.split('_');
+      navigation.navigate('ProductDetail', { id: productId, unitId: Number(unitId) });
+    } else {
+      navigation.navigate('ProductDetail', { id: composed });
+    }
+  };
+
+  const handleAddToCart = (product: any) => {
+    const composed = String(product.id ?? '');
+    const unitIdStr = composed.includes('_') ? composed.split('_')[1] : composed;
+    const productIdStr = composed.includes('_') ? composed.split('_')[0] : composed;
+
+    const priceStr = product.price || '';
+    const priceNum = priceStr.replace(/[^\d]/g, '');
+    const priceNumber = priceNum ? Number(priceNum) : 0;
+
+    CartStore.addItem({
+      id: unitIdStr,
+      name: product.name || 'Sản phẩm',
+      price: priceNumber,
+      image: product.image,
+      productUnitId: composed.includes('_') ? Number(unitIdStr) : undefined,
+      productId: Number(productIdStr) || undefined,
+    });
+
+    showSuccess('Đã thêm vào giỏ hàng');
+  };
+
+  // Debounced product search
+  useEffect(() => {
+    let timer: any;
+    const run = async () => {
+      const q = (search || '').trim();
+      if (q.length < 2) {
+        setSearchResults([]);
+        return;
+      }
+      try {
+        setLoadingSearch(true);
+        const resp = await ProductApi.searchProducts(q);
+        const data = (resp as any)?.data || [];
+        const cards = await mapProductsToCardsAsync(data);
+        setSearchResults(cards);
+      } catch (e) {
+        console.error('Search error:', e);
+        setSearchResults([]);
+      } finally {
+        setLoadingSearch(false);
+      }
+    };
+    timer = setTimeout(run, 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   // Render loading state
   if (loading) {
     return (
@@ -161,28 +287,71 @@ export default function ExploreScreen() {
     );
   }
 
+  // Filter categories based on search (only when search is short or empty)
+  const filteredCategories = categories.filter(category => {
+    if (!search.trim()) return true;
+    // If search is long (>= 2 chars), show products instead of categories
+    if (search.trim().length >= 2) return false;
+    const searchLower = search.toLowerCase().trim();
+    return category.name.toLowerCase().includes(searchLower) ||
+           (category.description && category.description.toLowerCase().includes(searchLower));
+  });
+
+  // Show products when searching, categories when not searching
+  const showProducts = search.trim().length >= 2;
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tìm Sản Phẩm</Text>
-      <SearchBar value={search} onChangeText={setSearch} />
-      <FlatList
-        data={categories}
-        numColumns={2}
-        keyExtractor={item => item.id.toString()}
-        columnWrapperStyle={{ justifyContent: 'space-between' }}
-        contentContainerStyle={{ paddingBottom: 100, marginTop: 8 }}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: item.bgColor, borderColor: item.borderColor, width: ITEM_WIDTH }]}
-            onPress={() => handleCategoryPress(item)}
-            activeOpacity={0.8}
-          >
-            <Image source={item.image} style={styles.cardImage} />
-            <Text style={styles.cardText}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <SearchBar value={search} onChangeText={setSearch} placeholder="Tìm kiếm sản phẩm hoặc danh mục..." />
+      {showProducts ? (
+        // Show product search results
+        loadingSearch ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#53B175" />
+            <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
+          </View>
+        ) : searchResults.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Không tìm thấy sản phẩm nào</Text>
+            <Text style={styles.emptySubtext}>Thử tìm kiếm với từ khóa khác</Text>
+          </View>
+        ) : (
+          <ExclusiveOfferSection
+            title=""
+            data={searchResults}
+            onProductPress={handleProductPress}
+            onAddToCart={handleAddToCart}
+          />
+        )
+      ) : (
+        // Show categories
+        filteredCategories.length === 0 && search.trim() ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Không tìm thấy danh mục nào</Text>
+            <Text style={styles.emptySubtext}>Thử tìm kiếm với từ khóa khác</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredCategories}
+            numColumns={2}
+            keyExtractor={item => item.id.toString()}
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
+            contentContainerStyle={{ paddingBottom: 100, marginTop: 8 }}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[styles.card, { backgroundColor: item.bgColor, borderColor: item.borderColor, width: ITEM_WIDTH }]}
+                onPress={() => handleCategoryPress(item)}
+                activeOpacity={0.8}
+              >
+                <Image source={item.image} style={styles.cardImage} />
+                <Text style={styles.cardText}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )
+      )}
     </View>
   );
 }
@@ -259,7 +428,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
   },
   // Retry button
   retryButton: {
