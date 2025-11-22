@@ -20,6 +20,11 @@ const menuItems = [
     icon: 'person-outline',
   },
   {
+    id: '5',
+    title: 'Đổi Mật Khẩu',
+    icon: 'lock-closed-outline',
+  },
+  {
     id: '3',
     title: 'Trợ Lý AI',
     icon: 'chatbubble-ellipses-outline',
@@ -68,6 +73,8 @@ const AccountScreen: React.FC = () => {
           navigation.navigate('Profile');
         } else if (item.title === 'Đơn Hàng') {
           navigation.navigate('Orders');
+        } else if (item.title === 'Đổi Mật Khẩu') {
+          navigation.navigate('ChangePassword');
         } else if (item.title === 'Trợ Lý AI') {
           navigation.navigate('Chat');
         } else if (item.title === 'Thông Báo') {

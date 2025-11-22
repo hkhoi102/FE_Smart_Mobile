@@ -27,6 +27,7 @@ export type RootStackParamList = {
   Scanner: undefined;
   SeeAll: { title?: string; items: { id: string; image: any; name: string; desc: string; price: string }[] };
   Profile: undefined;
+  ChangePassword: undefined;
   Orders: undefined;
   OrderDetail: { orderId: number };
   Chat: undefined;

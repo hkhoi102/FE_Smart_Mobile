@@ -41,6 +41,7 @@ import SeeAllScreen from '../screens/product/SeeAllScreen';
 import ScannerScreen from '../screens/scanner/ScannerScreen';
 import ChatScreen from '../screens/chat/ChatScreen';
 import AboutScreen from '../screens/account/AboutScreen';
+import ChangePasswordScreen from '../screens/account/ChangePasswordScreen';
 import NotificationScreen from '../screens/account/NotificationScreen';
 import HelpScreen from '../screens/account/HelpScreen';
 
@@ -179,6 +180,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Scanner" component={ScannerScreen} />
         <Stack.Screen name="SeeAll" component={SeeAllScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
         <Stack.Screen name="Orders" component={OrdersScreen} />
         <Stack.Screen name="OrderDetail" component={OrderDetailScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />

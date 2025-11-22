@@ -44,6 +44,14 @@ class CustomerApi {
       phoneNumber: data.phoneNumber ?? data.phone ?? '',
     };
   }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const body = {
+      currentPassword,
+      newPassword,
+    };
+    await this.apiClient.put('/api/users/me/change-password', body);
+  }
 }
 
 export default new CustomerApi();
