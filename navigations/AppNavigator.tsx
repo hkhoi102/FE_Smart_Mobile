@@ -1,10 +1,12 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import { NotificationProvider } from '../contexts/NotificationContext';
 import AppStateManager from '../utils/AppStateManager';
+import { CartStore } from '../stores/CartStore';
+import { FavouriteStore } from '../stores/FavouriteStore';
 
 import { HapticTab } from '../components/HapticTab';
 import { IconSymbol } from '../components/ui/IconSymbol';
@@ -50,6 +52,14 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 function TabNavigator() {
   const colorScheme = useColorScheme();
+  const cartState = CartStore.useCart();
+  const favouriteState = FavouriteStore.useFavourites();
+
+  const cartCount = useMemo(
+    () => cartState.items.reduce((total, item) => total + (item.quantity ?? 0), 0),
+    [cartState.items]
+  );
+  const favouriteCount = favouriteState.items.length;
 
   return (
     <Tab.Navigator
@@ -103,6 +113,14 @@ function TabNavigator() {
         component={CartScreen}
         options={{
           title: 'Giỏ Hàng',
+          tabBarBadge: cartCount > 0 ? cartCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: Colors[colorScheme ?? 'light'].green,
+            color: Colors[colorScheme ?? 'light'].background,
+            minWidth: 16,
+            height: 16,
+            fontSize: 10,
+          },
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="cart" color={color} />
           ),
@@ -113,6 +131,14 @@ function TabNavigator() {
         component={FavouriteScreen}
         options={{
           title: 'Yêu Thích',
+          tabBarBadge: favouriteCount > 0 ? favouriteCount : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: Colors[colorScheme ?? 'light'].green,
+            color: Colors[colorScheme ?? 'light'].background,
+            minWidth: 16,
+            height: 16,
+            fontSize: 10,
+          },
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="heart" color={color} />
           ),
